@@ -446,6 +446,8 @@ static int cf_adapter_budget(struct lc_centry *ce, struct lc_value *val)
 	{ adapter->budgetmode=val->num; return 1; }
 static int cf_adapter_packetbuffer(struct lc_centry *ce, struct lc_value *val)
 	{ adapter->dvr.buffer.size=val->num; return 1; }
+static int cf_adapter_frontend(struct lc_centry *ce, struct lc_value *val)
+	{ adapter->feno=val->num; return 1; }
 static int cf_adapter_dvrbuffer(struct lc_centry *ce, struct lc_value *val)
 	{ adapter->dvr.dvrbuffer=val->num; return 1; }
 static int cf_adapter_statinterval(struct lc_centry *ce, struct lc_value *val)
@@ -456,6 +458,7 @@ static int cf_adapter_stuckinterval(struct lc_centry *ce, struct lc_value *val)
 static struct lc_ventry conf_adapter[] = {
 	{ "budget-mode", 0, 1, LCV_BOOL, 0, NULL, cf_adapter_budget },
 	{ "packet-buffer", 0, 1, LCV_NUM, 0, NULL, cf_adapter_packetbuffer },
+	{ "frontend", 0, 1, LCV_NUM, 0, NULL, cf_adapter_frontend },
 	{ "dvr-buffer", 0, 1, LCV_NUM, 0, NULL, cf_adapter_dvrbuffer },
 	{ "stat-interval", 0, 1, LCV_NUM, 0, NULL, cf_adapter_statinterval },
 	{ "stuck-interval", 0, 1, LCV_NUM, 0, NULL, cf_adapter_stuckinterval },
@@ -473,7 +476,7 @@ static struct lc_ventry conf_http[] = {
 };
 
 static struct lc_ventry conf_main[] = {
-	{ "adapter", 1, 0, LCV_NUM, LCO_UNIQ, conf_adapter, cf_adapter_start },
+	{ "adapter", 1, 0, LCV_NUM, 0, conf_adapter, cf_adapter_start },
 	{ "http", 1, 1, LCV_NONE, 0, conf_http, NULL },
 	{ NULL, 0, 0, 0, 0, NULL },
 };

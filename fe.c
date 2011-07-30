@@ -213,18 +213,18 @@ static int fe_tune_dvbs(struct adapter_s *adapter) {
 
 	if (adapter->fe.dvbs.lnbsharing) {
 		int value=SEC_TONE_OFF;
-		logwrite(LOG_DEBUG, "fe: Adapter %d lnb-sharing active - trying to turn off", adapter->no);
+		logwrite(LOG_DEBUG, "fe: Adapter %d:%d lnb-sharing active - trying to turn off", adapter->no, adapter->feno);
 
 		if (ioctl(adapter->fe.fd, FE_SET_TONE, value) < 0) {
-			logwrite(LOG_ERROR, "fe: Adapter %d ioctl FE_SET_TONE failed - %s", adapter->no, strerror(errno));
+			logwrite(LOG_ERROR, "fe: Adapter %d:%d ioctl FE_SET_TONE failed - %s", adapter->no, adapter->feno, strerror(errno));
 		}
 
 		value=SEC_VOLTAGE_OFF;
 		if (ioctl(adapter->fe.fd, FE_SET_VOLTAGE, value) < 0) {
 			if (errno == EINVAL) {
-				logwrite(LOG_DEBUG, "fe: Adapter %d SEC_VOLTAGE_OFF not possible", adapter->no);
+				logwrite(LOG_DEBUG, "fe: Adapter %d:%d SEC_VOLTAGE_OFF not possible", adapter->no, adapter->feno);
 				if (ioctl(adapter->fe.fd, FE_SET_VOLTAGE, voltage) < 0) {
-					logwrite(LOG_ERROR, "fe: Adapter %d ioctl FE_SET_VOLTAGE failed - %s", adapter->no, strerror(errno));
+					logwrite(LOG_ERROR, "fe: Adapter %d:%d ioctl FE_SET_VOLTAGE failed - %s", adapter->no, adapter->feno, strerror(errno));
 				}
 			}
 		}
@@ -463,8 +463,8 @@ static void fe_check_status(int fd, short event, void *arg) {
 
 	if (res == 0) {
 		if (!(status & FE_HAS_LOCK)) {
-			logwrite(LOG_INFO, "fe: Adapter %d Status: 0x%02x (%s)",
-					adapter->no, status, fe_decode_status(status));
+			logwrite(LOG_INFO, "fe: Adapter %d:%d Status: 0x%02x (%s)",
+					adapter->no, adapter->feno, status, fe_decode_status(status));
 			fe_retune(adapter);
 		}
 	}
@@ -497,8 +497,8 @@ static void fe_event(int fd, short ev, void *arg) {
 	res=ioctl(adapter->fe.fd, FE_GET_EVENT, &event);
 
 	if (res < 0 && errno != EOVERFLOW) {
-		logwrite(LOG_ERROR, "fe: Adapter %d Status event overflow %d",
-				adapter->no, errno);
+		logwrite(LOG_ERROR, "fe: Adapter %d:%d Status event overflow %d",
+				adapter->no, adapter->feno, errno);
 		return;
 	}
 
@@ -507,8 +507,8 @@ static void fe_event(int fd, short ev, void *arg) {
 	if (res >= 0 && status) {
 		if (!(status & FE_TIMEDOUT)) {
 
-			logwrite(LOG_INFO, "fe: Adapter %d Status: 0x%02x (%s)",
-				adapter->no, status, fe_decode_status(status));
+			logwrite(LOG_INFO, "fe: Adapter %d:%d Status: 0x%02x (%s)",
+				adapter->no, adapter->feno, status, fe_decode_status(status));
 
 			if (!(status & FE_HAS_LOCK)) {
 				fe_retune(adapter);
@@ -601,20 +601,23 @@ static void fe_api3_checkcap(struct adapter_s *adapter) {
 		logwrite(LOG_ERROR, "fe: adapter %d is incapable of handling FEC_AUTO - please report to flo@rfc822.org", adapter->no);
 	}
 
-	logwrite(LOG_DEBUG, "fe: adapter %d type %s name \"%s\"",
+	logwrite(LOG_DEBUG, "fe: adapter %d:%d type %s name \"%s\"",
 				adapter->no,
+				adapter->feno,
 				type,
 				adapter->fe.feinfo.name);
 
-	logwrite(LOG_DEBUG, "fe: adapter %d frequency min %d max %d step %d tolerance %d",
+	logwrite(LOG_DEBUG, "fe: adapter %d:%d frequency min %d max %d step %d tolerance %d",
 				adapter->no,
+				adapter->feno,
 				adapter->fe.feinfo.frequency_min,
 				adapter->fe.feinfo.frequency_max,
 				adapter->fe.feinfo.frequency_stepsize,
 				adapter->fe.feinfo.frequency_tolerance);
 
-	logwrite(LOG_DEBUG, "fe: adapter %d symbol rate min %d max %d tolerance %d",
+	logwrite(LOG_DEBUG, "fe: adapter %d:%d symbol rate min %d max %d tolerance %d",
 				adapter->no,
+				adapter->feno,
 				adapter->fe.feinfo.symbol_rate_min,
 				adapter->fe.feinfo.symbol_rate_max,
 				adapter->fe.feinfo.symbol_rate_tolerance);
@@ -633,7 +636,7 @@ static void fe_checkcap(struct adapter_s *adapter) {
 int fe_tune_init(struct adapter_s *adapter) {
 	char		fename[128];
 
-	sprintf(fename, "/dev/dvb/adapter%d/frontend0", adapter->no);
+	sprintf(fename, "/dev/dvb/adapter%d/frontend%d", adapter->no, adapter->feno);
 
 	adapter->fe.fd=open(fename, O_RDWR|O_NONBLOCK);
 
@@ -642,7 +645,7 @@ int fe_tune_init(struct adapter_s *adapter) {
 		exit(-1);
 	}
 
-	logwrite(LOG_INFO, "fe: Adapter %d Setting up frontend tuner", adapter->no);
+	logwrite(LOG_INFO, "fe: Adapter %d:%d Setting up frontend tuner", adapter->no, adapter->feno);
 
 	fe_checkcap(adapter);
 

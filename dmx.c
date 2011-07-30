@@ -19,10 +19,10 @@
 #include "getstream.h"
 #include "psi.h"
 
-static inline char *dmxname(int adapter) {
+static inline char *dmxname(int adapter, int feno) {
 	static char	dmxname[128];
 
-	sprintf(dmxname, "/dev/dvb/adapter%d/demux0", adapter);
+	sprintf(dmxname, "/dev/dvb/adapter%d/demux%d", adapter, feno);
 
 	return dmxname;
 }
@@ -75,7 +75,7 @@ int dmx_join_pid(struct adapter_s *a, unsigned int pid, int type) {
 		return 1;
 	}
 
-	fd=open(dmxname(a->no), O_RDWR);
+	fd=open(dmxname(a->no, a->feno), O_RDWR);
 
 	if (fd < 0) {
 		logwrite(LOG_ERROR,"dmx: failed opening dmx device for joining pid %d", pid);

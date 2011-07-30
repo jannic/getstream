@@ -141,6 +141,7 @@ struct dvrpt_s {
 
 struct adapter_s {
 	int			no;		/* Adapter Number */
+	int			feno;		/* Frontend Number */
 	int			type;		/* Adapter Type - DVB-S/DVB-T/DVB-C */
 
 	int			budgetmode;

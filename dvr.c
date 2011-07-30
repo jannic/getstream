@@ -30,10 +30,10 @@ struct pidcallback_s {
 	unsigned int	pidt;
 };
 
-static inline char *dvrname(int adapter) {
+static inline char *dvrname(int adapter, int feno) {
 	static char	dvrname[128];
 
-	sprintf(dvrname, "/dev/dvb/adapter%d/dvr0", adapter);
+	sprintf(dvrname, "/dev/dvb/adapter%d/dvr%d", adapter, feno);
 
 	return dvrname;
 }
@@ -302,7 +302,7 @@ int dvr_init(struct adapter_s *a) {
 
 	a->dvr.buffer.ptr=malloc(a->dvr.buffer.size*TS_PACKET_SIZE);
 
-	dvrfd=open(dvrname(a->no), O_RDONLY|O_NONBLOCK);
+	dvrfd=open(dvrname(a->no,a->feno), O_RDONLY|O_NONBLOCK);
 
 	if (dvrfd < 0)
 		return 0;
