@@ -17,6 +17,7 @@ Configuration:
 			packet-buffer	50;
 			stat-interval	120;
 			stuck-interval  200;
+			frontend	0;
 		  };
 
 	  - budget-mode
@@ -51,7 +52,10 @@ Configuration:
 	  - stuck-interval
 	  	Interval to fire the stuck check timer for e.g. FlexCop cards.
 		Default 5 seconds, 0 disables.
-	  
+
+	  - frontend
+		Sets the frontend of the adapter to be used, in case the adapter
+		has multiple inputs. Default 0 (first frontend).
 
   Tuning or Card type:
   --------------------
